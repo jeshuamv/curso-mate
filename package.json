@@ -1,0 +1,12 @@
+{
+  "name": "curso-mate",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Curso autogestionable de matemáticas remedial - Universidad de Montemorelos",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/neon": "^1.0.0"
+  }
+}
