@@ -1,6 +1,4 @@
-import { neon } from '@netlify/neon';
-
-const sql = neon(); // usa NETLIFY_DATABASE_URL, inyectada automáticamente
+import { getDatabase } from '@netlify/database'; const db = getDatabase();
 
 export default async (req) => {
   const url = new URL(req.url);
@@ -14,7 +12,7 @@ export default async (req) => {
   }
 
   if (req.method === 'GET') {
-    const rows = await sql`
+    const rows = await db.sql` 
       select
         t.id as topic_id, t.name as topic_name, t.order_index as topic_order,
         n.id as node_id, n.name as node_name, n.order_index as node_order,
@@ -36,13 +34,13 @@ export default async (req) => {
     const body = await req.json();
     const { node_id, exercise_id, is_correct, error_type, steps_submitted } = body;
 
-    await sql`
+    await db.sql`
       insert into exercise_attempts (student_id, exercise_id, node_id, is_correct, error_type, steps_submitted)
       values (${studentId}, ${exercise_id}, ${node_id}, ${is_correct}, ${error_type}, ${steps_submitted ? JSON.stringify(steps_submitted) : null})
     `;
 
     if (!is_correct && error_type) {
-      await sql`
+      await db.sql`
         insert into error_patterns (student_id, node_id, error_type, count)
         values (${studentId}, ${node_id}, ${error_type}, 1)
         on conflict (student_id, node_id, error_type)
@@ -50,7 +48,7 @@ export default async (req) => {
       `;
     }
 
-    await sql`
+    await db.sql`
       insert into student_node_progress (student_id, node_id, status, attempts_count, last_practiced_at)
       values (${studentId}, ${node_id}, 'desbloqueado', 1, now())
       on conflict (student_id, node_id)
